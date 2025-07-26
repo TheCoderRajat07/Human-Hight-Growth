@@ -1,12 +1,12 @@
 # Human-Hight-Growth
 # The Interactive Guide to Human Height
 
-Overview
+# Overview
 This project is a single-page interactive web application that transforms a comprehensive scientific report on human height into an engaging and easily digestible educational experience. The application breaks down the complex science behind what determines our stature into five key pillars: Genetics, Physiology, Hormones, Nutrition, and Lifestyle.
 
 Designed with a focus on user experience and information architecture, the guide uses a clean, responsive dashboard layout, allowing users to explore the interconnected topics non-linearly. The primary goal is to make dense scientific information accessible and understandable for a general audience through intuitive navigation and dynamic visualizations.
 
-Key Features
+# Key Features
 Thematic Sections: Content is organized into five logical, explorable sections:
 
 🧬 Genetics: Visualizes the heritability of height with a donut chart and explains the concept of polygenic traits.
@@ -25,7 +25,8 @@ Responsive Design: Fully responsive layout built with Tailwind CSS, ensuring a s
 
 Smooth Scrolling & Navigation: A persistent sidebar (on desktop) and a top navigation bar (on mobile) with smooth-scrolling functionality and active-state highlighting make navigating the single page effortless.
 
-Technologies Used
+# Technologies Used
+
 HTML5: For the core structure and content.
 
 Tailwind CSS: For all styling and creating a responsive layout.

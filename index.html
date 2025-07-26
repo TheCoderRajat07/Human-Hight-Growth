@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Interactive Guide to Human Height</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Accents -->
+    <!-- Application Structure Plan: The application is structured as a thematic, single-page dashboard with a persistent side navigation. This design was chosen over a linear report format to allow users to freely explore the interconnected pillars of height (Genetics, Physiology, Hormones, Nutrition, Lifestyle) in any order they choose. The user flow is non-linear, encouraging exploration. Key interactions include tabbed content within sections to break down complex topics (like the zones of a growth plate), and interactive charts to visualize data (like nutrient requirements). This structure enhances usability by making a complex, multi-faceted topic digestible and approachable, allowing users to focus on areas of interest without being forced through a sequential narrative. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Genetic Heritability (80-90%). Goal: Inform. Viz: Donut Chart (Chart.js). Interaction: Static display with clear labeling. Justification: A donut chart is an immediate, visually intuitive way to represent a simple but powerful percentage, emphasizing the overwhelming role of genetics.
+        - Report Info: Growth Plate Zones. Goal: Organize/Explain Process. Viz: Styled HTML/Tailwind Diagram. Interaction: Tabbed interface. Clicking a zone name reveals its detailed description. Justification: An interactive diagram is more engaging than a static image. It allows users to actively explore the step-by-step process of endochondral ossification at their own pace.
+        - Report Info: Hormonal Cascade. Goal: Explain Relationships. Viz: Styled HTML/Tailwind Flowchart. Interaction: Static visual guide. Justification: A clear, minimalist flowchart effectively illustrates the sequence and feedback loops of the GH-IGF-1 axis, clarifying the complex hormonal interactions.
+        - Report Info: Nutrient RDAs. Goal: Compare. Viz: Bar Chart (Chart.js). Interaction: Users can select age/sex groups via buttons to dynamically update the chart, comparing nutritional needs. Justification: An interactive bar chart makes the quantitative data from the report's table easily comparable and personalized, offering more value than a static table.
+        - Report Info: Natural GH Stimulation. Goal: Inform/Organize. Viz: Interactive Card List. Interaction: Hover effects on cards. Justification: Using styled cards presents actionable lifestyle tips in a visually appealing, easy-to-scan format.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .nav-link.active {
+            background-color: #F3EFEA;
+            color: #A56A43;
+            border-left-color: #A56A43;
+        }
+        .nav-link:hover {
+            background-color: #F6F3F0;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #A56A43;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-[#F8F5F2] p-6 hidden lg:block sticky top-0 h-screen">
+            <h1 class="text-2xl font-bold text-[#A56A43] mb-8">The Height Guide</h1>
+            <nav id="desktop-nav" class="space-y-2">
+                <a href="#genetics" class="nav-link block font-semibold p-3 rounded-r-lg">🧬 Genetics</a>
+                <a href="#physiology" class="nav-link block font-semibold p-3 rounded-r-lg">🔬 Physiology</a>
+                <a href="#hormones" class="nav-link block font-semibold p-3 rounded-r-lg">🧪 Hormones</a>
+                <a href="#nutrition" class="nav-link block font-semibold p-3 rounded-r-lg">🍎 Nutrition</a>
+                <a href="#lifestyle" class="nav-link block font-semibold p-3 rounded-r-lg">🏃 Lifestyle</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-8 lg:p-12">
+            <header class="lg:hidden mb-6">
+                 <h1 class="text-3xl font-bold text-center text-[#A56A43]">The Interactive Guide to Human Height</h1>
+                 <nav class="mt-4">
+                    <div class="flex justify-center space-x-2 overflow-x-auto pb-2">
+                        <a href="#genetics" class="mobile-nav-link flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700">Genetics</a>
+                        <a href="#physiology" class="mobile-nav-link flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700">Physiology</a>
+                        <a href="#hormones" class="mobile-nav-link flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700">Hormones</a>
+                        <a href="#nutrition" class="mobile-nav-link flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700">Nutrition</a>
+                        <a href="#lifestyle" class="mobile-nav-link flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700">Lifestyle</a>
+                    </div>
+                 </nav>
+            </header>
+
+            <section id="genetics" class="mb-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold mb-4 text-[#4A4A4A]">🧬 The Genetic Blueprint</h2>
+                <p class="mb-6 text-lg text-gray-600">Genetics is the primary determinant of human height, establishing the potential for how tall an individual can become. This section explores the profound influence of our DNA, from its overall heritability to the specific genes that orchestrate skeletal growth.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">The Power of Heritability</h3>
+                        <p class="text-gray-700 mb-4">Decades of research confirm that genetics account for approximately 80% of the variation in height among people. This means that while environmental factors like nutrition are crucial for reaching your potential, the blueprint is set by your inherited genes.</p>
+                         <div class="chart-container mx-auto" style="height: 250px; max-height: 250px;">
+                            <canvas id="heritabilityChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">A Polygenic Trait</h3>
+                        <p class="text-gray-700 mb-4">Height isn't controlled by a single "height gene." Instead, it's a polygenic trait influenced by thousands of genetic variants, each with a small, additive effect. A landmark 2022 study identified over 12,000 such variants, clustered in regions of the genome related to musculoskeletal development.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <span class="text-xl mr-3">💡</span>
+                                <div><strong class="text-gray-800">Key Genes:</strong> Variants near genes like <code class="bg-gray-200 text-sm p-1 rounded">ACAN</code> (cartilage) and <code class="bg-gray-200 text-sm p-1 rounded">FGFR3</code> (growth plate regulation) are strongly linked to height.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-xl mr-3">🔮</span>
+                                <div><strong class="text-gray-800">Polygenic Scores (PRS):</strong> In the future, genetic scores could predict a child's height potential and help identify growth-impairing health issues early.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="physiology" class="mb-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold mb-4 text-[#4A4A4A]">🔬 The Physiology of Growth</h2>
+                <p class="mb-6 text-lg text-gray-600">Genetic and hormonal signals are translated into physical length through a remarkable biological engine: the epiphyseal growth plate. This section details the step-by-step process of how bones elongate from infancy through adolescence.</p>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                     <h3 class="font-bold text-xl mb-4 text-center text-[#A56A43]">Inside the Growth Plate</h3>
+                     <p class="text-center text-gray-600 mb-6">The growth plate is a disc of cartilage at the ends of long bones, organized into distinct zones. Click on each zone to learn about its specific role in making you taller.</p>
+                    <div class="flex justify-center mb-6 border-b-2 border-gray-200">
+                        <button class="tab-btn active px-4 py-2 font-semibold" data-tab="reserve">Reserve Zone</button>
+                        <button class="tab-btn px-4 py-2 font-semibold" data-tab="proliferative">Proliferative Zone</button>
+                        <button class="tab-btn px-4 py-2 font-semibold" data-tab="hypertrophic">Hypertrophic Zone</button>
+                        <button class="tab-btn px-4 py-2 font-semibold" data-tab="calcification">Calcification Zone</button>
+                    </div>
+                    <div id="tab-content" class="p-4 rounded-lg bg-gray-50">
+                        <div class="tab-pane active" id="reserve">
+                            <h4 class="font-bold text-lg mb-2">Zone of Reserve</h4>
+                            <p>This zone contains a reservoir of stem-like cartilage cells (chondrocytes). They are quiescent, waiting for the signal to begin the growth process.</p>
+                        </div>
+                        <div class="tab-pane hidden" id="proliferative">
+                            <h4 class="font-bold text-lg mb-2">Zone of Proliferation</h4>
+                            <p>This is the engine of growth. Here, chondrocytes rapidly divide under the influence of growth hormones, stacking up in columns and pushing the end of the bone outwards, thus lengthening it.</p>
+                        </div>
+                        <div class="tab-pane hidden" id="hypertrophic">
+                             <h4 class="font-bold text-lg mb-2">Zone of Hypertrophy</h4>
+                            <p>Cells pushed from the proliferative zone stop dividing and swell dramatically in size (hypertrophy). They begin to alter the cartilage matrix around them, preparing it for mineralization.</p>
+                        </div>
+                        <div class="tab-pane hidden" id="calcification">
+                             <h4 class="font-bold text-lg mb-2">Zone of Calcification</h4>
+                            <p>The enlarged chondrocytes die, and the surrounding matrix hardens with calcium. This leaves a scaffold for new bone to be built upon, a process called endochondral ossification, which ultimately turns the cartilage into solid bone.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="hormones" class="mb-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold mb-4 text-[#4A4A4A]">🧪 The Endocrine Orchestra</h2>
+                <p class="mb-6 text-lg text-gray-600">Growth is directed by a symphony of hormones. This section illustrates the key chemical messengers, their interactions, and how they control the timing and tempo of growth, from the master GH-IGF-1 axis to the powerful surge of puberty.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">The GH-IGF-1 Axis</h3>
+                        <p class="text-gray-700 mb-4">This is the master regulator of growth. It's a cascade where the brain signals the release of Growth Hormone (GH), which in turn tells the liver and growth plates to produce Insulin-like Growth Factor 1 (IGF-1), the hormone that directly stimulates bone-lengthening.</p>
+                        <div class="space-y-4">
+                            <div class="text-center p-3 bg-blue-50 rounded-lg"><strong>1. Brain (Hypothalamus)</strong><br>Releases GHRH</div>
+                            <div class="text-center text-2xl">⬇️</div>
+                            <div class="text-center p-3 bg-green-50 rounded-lg"><strong>2. Pituitary Gland</strong><br>Releases Growth Hormone (GH)</div>
+                            <div class="text-center text-2xl">⬇️</div>
+                            <div class="text-center p-3 bg-yellow-50 rounded-lg"><strong>3. Liver & Growth Plates</strong><br>Produce IGF-1</div>
+                            <div class="text-center text-2xl">⬇️</div>
+                             <div class="text-center p-3 bg-red-50 rounded-lg"><strong>4. Bones Grow</strong><br>IGF-1 stimulates cell division</div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Supporting Hormones</h3>
+                        <p class="text-gray-700 mb-4">Other hormones play critical roles. Thyroid hormones ensure the body is responsive to GH, while sex hormones trigger the dramatic pubertal growth spurt before signaling for growth to stop.</p>
+                         <ul class="space-y-4">
+                            <li class="p-4 bg-gray-50 rounded-lg">
+                                <strong class="text-gray-800">Thyroid Hormones (T3/T4):</strong> Act as "permissive" agents. Without them, the GH-IGF-1 axis cannot function effectively.
+                            </li>
+                            <li class="p-4 bg-gray-50 rounded-lg">
+                                <strong class="text-gray-800">Sex Hormones (Estrogen & Testosterone):</strong> Powerfully amplify GH/IGF-1 release to cause the pubertal growth spurt. Estrogen, in both sexes, is the key signal that eventually closes the growth plates, ending growth permanently.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="nutrition" class="mb-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold mb-4 text-[#4A4A4A]">🍎 Nutritional Foundations</h2>
+                <p class="mb-6 text-lg text-gray-600">Nutrition provides the essential raw materials for growth. While it can't increase your genetic potential, it's the most critical environmental factor in determining whether you reach it. This section highlights the key nutrients and their recommended intake during peak growth years.</p>
+                 <div class="bg-white p-6 rounded-xl shadow-md">
+                     <h3 class="font-bold text-xl mb-4 text-center text-[#A56A43]">Key Nutrient Requirements</h3>
+                     <p class="text-center text-gray-600 mb-6">Select an age group to see the recommended daily intake of crucial growth nutrients. Notice how needs, especially for calcium, peak during the adolescent growth spurt.</p>
+                    <div class="flex justify-center flex-wrap gap-2 mb-6">
+                        <button class="nutrient-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-semibold" data-group="group1">Ages 4-8</button>
+                        <button class="nutrient-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-semibold" data-group="group2">Ages 9-13</button>
+                        <button class="nutrient-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-semibold active" data-group="group3">Girls 14-18</button>
+                        <button class="nutrient-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-semibold" data-group="group4">Boys 14-18</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="nutritionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="lifestyle" class="scroll-mt-20">
+                <h2 class="text-3xl font-bold mb-4 text-[#4A4A4A]">🏃 Lifestyle & Environment</h2>
+                <p class="mb-6 text-lg text-gray-600">Beyond genetics and nutrition, daily habits and overall well-being significantly influence the hormonal and physiological systems that govern growth. This section details actionable, natural strategies to optimize the body's environment for reaching its full height potential.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Prioritize Deep Sleep</h3>
+                        <p class="text-gray-700">The most significant pulse of Growth Hormone (GH) is released during deep, slow-wave sleep. Aim for 9-11 hours per night during school years and adolescence.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Engage in High-Impact Exercise</h3>
+                        <p class="text-gray-700">Weight-bearing activities like running and jumping stimulate bone density. High-intensity exercise also triggers a natural release of GH.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Maintain a Healthy Weight</h3>
+                        <p class="text-gray-700">Excess body fat, particularly around the abdomen, is linked to lower GH secretion. A healthy body composition optimizes the hormonal environment for growth.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Reduce Sugar Intake</h3>
+                        <p class="text-gray-700">High insulin levels, which spike after sugary meals, can suppress GH release. Limiting refined carbs, especially before bed, helps maximize the crucial nocturnal GH pulse.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Manage Stress</h3>
+                        <p class="text-gray-700">Chronic stress and high levels of the stress hormone cortisol can interfere with the GH-IGF-1 axis. A supportive environment is crucial for healthy development.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="font-bold text-xl mb-3 text-[#A56A43]">Eat Amino Acid-Rich Foods</h3>
+                        <p class="text-gray-700">Foods rich in protein (meat, dairy, eggs, nuts) provide amino acids like arginine and glutamine, which are the building blocks of tissue and may help support GH production.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const heritabilityCtx = document.getElementById('heritabilityChart').getContext('2d');
+            new Chart(heritabilityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Genetics', 'Environment (Nutrition, Lifestyle, etc.)'],
+                    datasets: [{
+                        data: [80, 20],
+                        backgroundColor: ['#A56A43', '#F3EFEA'],
+                        borderColor: ['#FFFFFF'],
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#4A4A4A',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const tabId = button.dataset.tab;
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                            pane.classList.add('active');
+                        } else {
+                            pane.classList.add('hidden');
+                            pane.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            const nutritionData = {
+                group1: { labels: ['Protein (oz)', 'Calcium (mg)', 'Vitamin D (IU)', 'Zinc (mg)'], data: [4.25, 1000, 600, 5] },
+                group2: { labels: ['Protein (oz)', 'Calcium (mg)', 'Vitamin D (IU)', 'Zinc (mg)'], data: [5.25, 1300, 600, 8] },
+                group3: { labels: ['Protein (oz)', 'Calcium (mg)', 'Vitamin D (IU)', 'Zinc (mg)'], data: [5.75, 1300, 600, 9] },
+                group4: { labels: ['Protein (oz)', 'Calcium (mg)', 'Vitamin D (IU)', 'Zinc (mg)'], data: [6.25, 1300, 600, 11] }
+            };
+
+            const nutritionCtx = document.getElementById('nutritionChart').getContext('2d');
+            let nutritionChart = new Chart(nutritionCtx, {
+                type: 'bar',
+                data: {
+                    labels: nutritionData.group3.labels,
+                    datasets: [{
+                        label: 'Recommended Daily Intake',
+                        data: nutritionData.group3.data,
+                        backgroundColor: ['#A56A43', '#C79D81', '#E8D9CF', '#BFA18F'],
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: { color: '#4A4A4A' }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: { color: '#4A4A4A', font: { size: 14 } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            const nutrientButtons = document.querySelectorAll('.nutrient-btn');
+            nutrientButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    nutrientButtons.forEach(btn => btn.classList.remove('active', 'bg-[#A56A43]', 'text-white'));
+                    button.classList.add('active', 'bg-[#A56A43]', 'text-white');
+                    const group = button.dataset.group;
+                    nutritionChart.data.labels = nutritionData[group].labels;
+                    nutritionChart.data.datasets[0].data = nutritionData[group].data;
+                    nutritionChart.update();
+                });
+            });
+            document.querySelector('.nutrient-btn[data-group="group3"]').classList.add('bg-[#A56A43]', 'text-white');
+            document.querySelector('.nutrient-btn[data-group="group3"]').classList.remove('bg-gray-200', 'text-gray-800');
+
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                        });
+                        mobileNavLinks.forEach(link => {
+                            link.classList.toggle('bg-[#A56A43]', link.getAttribute('href') === `#${id}`);
+                            link.classList.toggle('text-white', link.getAttribute('href') === `#${id}`);
+                            link.classList.toggle('bg-gray-200', !(link.getAttribute('href') === `#${id}`));
+                            link.classList.toggle('text-gray-700', !(link.getAttribute('href') === `#${id}`));
+                        });
+                    }
+                });
+            }, { rootMargin: '-30% 0px -70% 0px', threshold: 0 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
